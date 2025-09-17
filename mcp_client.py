@@ -13,10 +13,19 @@ def resolve_server_url() -> str:
     return "https://ca3eda3eb9a9.ngrok-free.app"
 
 
-async def call_send_gmail(server_url: str, name: str, email: str) -> Dict[str, Any]:
+async def call_send_gmail(server_url: str, name: str, content: str, subject: str, api_key: str, 
+                         to_email: str, from_email: str, password: str) -> Dict[str, Any]:
     url = f"{server_url.rstrip('/')}/tools/send_gmail"
     async with httpx.AsyncClient(timeout=15.0) as client:
-        response = await client.post(url, json={"name": name, "email": email})
+        response = await client.post(url, json={
+            "name": name,
+            "content": content,
+            "subject": subject,
+            "api_key": api_key,
+            "to_email": to_email,
+            "from_email": from_email,
+            "password": password
+        })
         response.raise_for_status()
         return response.json()
 
@@ -34,7 +43,12 @@ async def main() -> None:
     parser.add_argument("--server-url", dest="server_url", default=resolve_server_url())
     parser.add_argument("--tool", dest="tool_name", default="send_gmail")
     parser.add_argument("--name", dest="name", default="John Doe")
-    parser.add_argument("--email", dest="email", default="john.doe@example.com")
+    parser.add_argument("--content", dest="content", default="Email content")
+    parser.add_argument("--subject", dest="subject", default="Email subject")
+    parser.add_argument("--api-key", dest="api_key", required=True)
+    parser.add_argument("--to-email", dest="to_email", required=True)
+    parser.add_argument("--from-email", dest="from_email", required=True)
+    parser.add_argument("--password", dest="password", required=True)
     args = parser.parse_args()
 
     # Discover available tools first
@@ -45,7 +59,16 @@ async def main() -> None:
 
     selected = tools[args.tool_name]
     if selected["name"] == "send_gmail":
-        result = await call_send_gmail(server_url=args.server_url, name=args.name, email=args.email)
+        result = await call_send_gmail(
+            server_url=args.server_url,
+            name=args.name,
+            content=args.content,
+            subject=args.subject,
+            api_key=args.api_key,
+            to_email=args.to_email,
+            from_email=args.from_email,
+            password=args.password
+        )
     else:
         raise SystemExit(f"No caller implemented for tool '{selected['name']}'")
 
@@ -54,5 +77,4 @@ async def main() -> None:
 
 if __name__ == "__main__":
     asyncio.run(main())
-
 
