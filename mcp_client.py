@@ -10,7 +10,7 @@ def resolve_server_url() -> str:
     env_url = os.getenv("MCP_SERVER_URL")
     if env_url:
         return env_url
-    return "https://ca3eda3eb9a9.ngrok-free.app" #https requests only! no curl cmd!!!!
+    return "https://mosfgw7ezn.ap.loclx.io" #https requests only! no curl cmd!!!!
 
 
 async def call_send_gmail(server_url: str, name: str, content: str, subject: str, api_key: str, 
